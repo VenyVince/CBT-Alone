@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>정보처리기사 CBT</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="home-page">
+  <main class="home-shell">
+    <section class="exam-picker" aria-labelledby="page-title">
+      <p class="eyebrow">정보처리기사 기출 CBT</p>
+      <h1 id="page-title">시험 회차 선택</h1>
+      <form id="exam-form" class="picker-form">
+        <label for="exam-select">응시할 회차</label>
+        <select id="exam-select" name="exam" required></select>
+        <button type="submit">시험 시작</button>
+      </form>
+      <p class="helper-text">답안은 브라우저에 자동 저장됩니다.</p>
+    </section>
+  </main>
+
+  <script>
+    const exams = [
+      { id: '2025_3', label: '2025년 3회' },
+      { id: '2025_2', label: '2025년 2회' },
+      { id: '2025_1', label: '2025년 1회' },
+      { id: '2024_3', label: '2024년 3회' },
+      { id: '2024_2', label: '2024년 2회' },
+      { id: '2024_1', label: '2024년 1회' },
+      { id: '2023_3', label: '2023년 3회' },
+      { id: '2023_2', label: '2023년 2회' },
+      { id: '2023_1', label: '2023년 1회' },
+    ];
+
+    const select = document.getElementById('exam-select');
+    exams.forEach((exam) => {
+      const option = document.createElement('option');
+      option.value = exam.id;
+      option.textContent = exam.label;
+      select.appendChild(option);
+    });
+
+    document.getElementById('exam-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const examId = select.value;
+      if (!examId) return;
+      location.href = `exam.html?exam=${encodeURIComponent(examId)}`;
+    });
+  </script>
+</body>
+</html>
