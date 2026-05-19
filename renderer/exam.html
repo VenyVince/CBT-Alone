@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CBT 시험</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="exam-page">
+  <main class="exam-container">
+    <section class="pdf-panel" aria-label="문제 PDF">
+      <iframe id="pdf-frame" title="기출문제 PDF"></iframe>
+    </section>
+
+    <aside class="sidebar" aria-label="답안 입력">
+      <header class="sidebar-header">
+        <button id="back-btn" class="back-button" type="button">뒤로가기</button>
+        <h1 id="exam-title">CBT</h1>
+      </header>
+
+      <div class="sticky-controls">
+        <section class="timer-panel" aria-label="타이머">
+          <div>
+            <span id="timer-status" class="timer-status">진행 중</span>
+            <strong id="timer-display" class="timer-display">00:00:00</strong>
+          </div>
+          <span id="timer-overtime" class="timer-overtime" aria-live="polite"></span>
+        </section>
+
+        <section class="result-panel" aria-live="polite">
+          <div class="control-buttons">
+            <button id="check-btn" type="button">오답 체크</button>
+            <button id="reset-btn" type="button" class="secondary-button">초기화</button>
+          </div>
+          <p id="score-display" class="score-display">아직 채점하지 않았습니다.</p>
+          <p id="wrong-list" class="wrong-list"></p>
+        </section>
+      </div>
+
+      <section>
+        <div class="answer-head">
+          <h2>답안</h2>
+          <span id="answered-count">0/100</span>
+        </div>
+        <div id="answer-container" class="answer-container"></div>
+      </section>
+    </aside>
+  </main>
+
+  <script src="js/timer.js"></script>
+  <script src="js/answers.js"></script>
+</body>
+</html>

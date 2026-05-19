@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>정답 편집</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="editor-page">
+  <main class="editor-shell">
+    <header class="editor-header">
+      <button id="back-btn" class="back-button" type="button">뒤로가기</button>
+      <h1>정답 편집</h1>
+    </header>
+
+    <section class="editor-form">
+      <label for="label-input">표시 이름</label>
+      <input id="label-input" type="text" placeholder="예: 2025년 정보처리기사 1회">
+
+      <label for="raw-input">정답 입력</label>
+      <textarea id="raw-input" rows="7" placeholder="1~4 숫자를 스페이스, 줄바꿈, 쉼표로 구분해서 입력"></textarea>
+
+      <div class="editor-actions">
+        <button id="save-btn" type="button">저장</button>
+        <button id="clear-btn" type="button" class="secondary-button">초기화</button>
+      </div>
+
+      <p id="editor-status" class="helper-text"></p>
+    </section>
+
+    <section>
+      <div class="answer-head">
+        <h2>문항</h2>
+        <span id="question-count">0문항</span>
+      </div>
+      <div id="answer-container" class="answer-container editor-answer-container"></div>
+    </section>
+  </main>
+
+  <script src="js/answer-editor.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>채점 기록</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="history-page">
+  <main id="history-container" class="history-container list-only">
+    <section class="history-panel" aria-label="채점 기록">
+      <header class="history-header">
+        <button id="back-btn" class="back-button" type="button">뒤로가기</button>
+        <div>
+          <p class="eyebrow">채점 기록</p>
+          <h1 id="history-title">CBT</h1>
+        </div>
+      </header>
+
+      <div id="history-list" class="history-list"></div>
+      <section class="history-detail">
+        <h2>상세</h2>
+        <p id="history-summary" class="score-display">기록을 선택하세요.</p>
+        <p id="history-wrong-list" class="wrong-list"></p>
+        <div id="history-answer-container" class="answer-container"></div>
+      </section>
+    </section>
+
+    <section class="pdf-panel" aria-label="문제 PDF">
+      <iframe id="pdf-frame" title="기출문제 PDF"></iframe>
+    </section>
+  </main>
+
+  <script src="js/history.js"></script>
+</body>
+</html>

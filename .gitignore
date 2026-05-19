@@ -1,2 +1,6 @@
 answers/
 pdfs/
+node_modules/
+dist/
+release/
+*.log

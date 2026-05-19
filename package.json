@@ -1,0 +1,39 @@
+{
+  "name": "cbt-electron",
+  "version": "1.0.0",
+  "description": "PDF CBT desktop app",
+  "author": "CBT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0"
+  },
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "local.cbt.app",
+    "productName": "CBT",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "include": "installer.nsh"
+    },
+    "mac": {
+      "target": "dmg"
+    }
+  }
+}
