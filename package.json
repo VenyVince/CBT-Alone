@@ -24,10 +24,12 @@
     "files": [
       "main.js",
       "preload.js",
-      "renderer/**/*"
+      "renderer/**/*",
+      "files/**/*"
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "files/icon.ico"
     },
     "nsis": {
       "include": "installer.nsh"
