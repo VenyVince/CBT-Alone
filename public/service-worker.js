@@ -1,5 +1,7 @@
 const CACHE_NAME = 'cbt-pwa-v3';
 const APP_SHELL = [
+  '/',
+  '/index.html',
   '/renderer/index.html',
   '/renderer/exam.html',
   '/renderer/answer-editor.html',

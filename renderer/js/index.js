@@ -64,25 +64,38 @@
 
       const startButton = document.createElement('button');
       startButton.type = 'button';
-      startButton.textContent = '시험 시작';
+      startButton.className = 'icon-button primary-icon-button';
+      startButton.dataset.tooltip = '시험 시작';
+      startButton.setAttribute('aria-label', '시험 시작');
+      startButton.title = '시험 시작';
+      startButton.textContent = '▶';
       startButton.addEventListener('click', () => navigate('exam.html', examId));
 
       const editButton = document.createElement('button');
       editButton.type = 'button';
-      editButton.className = 'secondary-button';
-      editButton.textContent = '정답 편집';
+      editButton.className = 'icon-button secondary-button';
+      editButton.dataset.tooltip = '정답 편집';
+      editButton.setAttribute('aria-label', '정답 편집');
+      editButton.title = '정답 편집';
+      editButton.textContent = '✎';
       editButton.addEventListener('click', () => navigate('answer-editor.html', examId));
 
       const deleteButton = document.createElement('button');
       deleteButton.type = 'button';
-      deleteButton.className = 'danger-button';
-      deleteButton.textContent = '삭제';
+      deleteButton.className = 'icon-button danger-button';
+      deleteButton.dataset.tooltip = '삭제';
+      deleteButton.setAttribute('aria-label', '삭제');
+      deleteButton.title = '삭제';
+      deleteButton.textContent = '×';
       deleteButton.addEventListener('click', () => deleteExam(examId));
 
       const historyButton = document.createElement('button');
       historyButton.type = 'button';
-      historyButton.className = 'secondary-button';
-      historyButton.textContent = '기록';
+      historyButton.className = 'icon-button secondary-button';
+      historyButton.dataset.tooltip = '기록';
+      historyButton.setAttribute('aria-label', '기록');
+      historyButton.title = '기록';
+      historyButton.textContent = '◷';
       historyButton.addEventListener('click', () => navigate('history.html', examId));
 
       row.append(info, startButton, editButton, historyButton, deleteButton);

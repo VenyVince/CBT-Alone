@@ -148,6 +148,15 @@ export function createPdfViewer(options = {}) {
       scale = Math.max(Math.min(availableWidth / viewport.width, 2.5), 0.4);
       await renderPage(pageNum);
     },
+    async fitToQuarterPage() {
+      if (!pdf || !viewer) return;
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 1 });
+      const availableWidth = Math.max(viewer.clientWidth - 28, 240);
+      const fitScale = availableWidth / viewport.width;
+      scale = Math.max(Math.min(fitScale * 2, 3), 0.8);
+      await renderPage(pageNum);
+    },
     setQuestionMap(map) {
       questionMap = map || {};
     },

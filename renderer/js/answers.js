@@ -295,7 +295,7 @@ import { createQuestionNavigation } from './navigation.js';
 
   const pdf = await pdfViewer.load(pdfBuffer);
   if (pdf) {
-    await pdfViewer.fitToScreen();
+    await pdfViewer.fitToQuarterPage();
     if (savedMap?.map) {
       mappingState = {
         status: 'partial',
