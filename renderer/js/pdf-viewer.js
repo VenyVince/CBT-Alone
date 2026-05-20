@@ -1,0 +1,204 @@
+import * as pdfjsLib from '../../node_modules/pdfjs-dist/build/pdf.min.mjs';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  '../../node_modules/pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
+
+function toUint8Array(bufferLike) {
+  if (!bufferLike) return null;
+  if (bufferLike instanceof Uint8Array) return bufferLike;
+  if (bufferLike instanceof ArrayBuffer) return new Uint8Array(bufferLike);
+  if (Array.isArray(bufferLike)) return new Uint8Array(bufferLike);
+  if (bufferLike.data) return new Uint8Array(bufferLike.data);
+  return new Uint8Array(bufferLike);
+}
+
+export function createPdfViewer(options = {}) {
+  const canvas = options.canvas || document.getElementById('pdf-canvas');
+  const status = options.status || document.getElementById('pdf-status');
+  const pageDisplay = options.pageDisplay || document.getElementById('page-display');
+  const viewer = options.viewer || document.getElementById('pdf-viewer');
+  const scrollContainer = options.scrollContainer || viewer?.closest('.pdf-panel') || viewer;
+  const zoomInput = options.zoomInput || document.getElementById('zoom-input');
+  const ctx = canvas?.getContext('2d');
+
+  let pdf = null;
+  let pageNum = 1;
+  let scale = 1.2;
+  let renderTask = null;
+  let renderQueue = Promise.resolve();
+  let questionMap = {};
+
+  function setStatus(message) {
+    if (status) {
+      status.textContent = message || '';
+      status.hidden = !message;
+    }
+  }
+
+  function updatePageDisplay() {
+    if (pageDisplay) {
+      pageDisplay.textContent = `${pageNum} / ${pdf?.numPages || 0} page`;
+    }
+    if (zoomInput) {
+      zoomInput.value = String(Math.round(scale * 100));
+    }
+  }
+
+  function normalizeMapEntry(entry) {
+    if (!entry) return null;
+    if (typeof entry === 'number') return { page: entry };
+    return entry;
+  }
+
+  async function scrollToPdfY(page, pdfY) {
+    if (!scrollContainer || pdfY === undefined || pdfY === null) return;
+    const viewport = page.getViewport({ scale });
+    const [, viewportY] = viewport.convertToViewportPoint(0, Number(pdfY));
+    scrollContainer.scrollTop = Math.max(viewportY - 28, 0);
+    scrollContainer.scrollLeft = 0;
+  }
+
+  async function drawPage(nextPageNum = pageNum, options = {}) {
+    if (!pdf || !canvas || !ctx) return;
+    pageNum = Math.min(Math.max(Number(nextPageNum) || 1, 1), pdf.numPages);
+    if (renderTask) {
+      renderTask.cancel();
+      renderTask = null;
+    }
+
+    const page = await pdf.getPage(pageNum);
+    const viewport = page.getViewport({ scale });
+    const outputScale = window.devicePixelRatio || 1;
+
+    canvas.width = Math.floor(viewport.width * outputScale);
+    canvas.height = Math.floor(viewport.height * outputScale);
+    canvas.style.width = `${Math.floor(viewport.width)}px`;
+    canvas.style.height = `${Math.floor(viewport.height)}px`;
+
+    const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+    renderTask = page.render({ canvasContext: ctx, viewport, transform });
+
+    try {
+      await renderTask.promise;
+      await scrollToPdfY(page, options.pdfY);
+      setStatus('');
+    } catch (error) {
+      if (error?.name !== 'RenderingCancelledException') {
+        setStatus('PDF 페이지를 렌더링하지 못했습니다.');
+      }
+    } finally {
+      renderTask = null;
+      updatePageDisplay();
+    }
+  }
+
+  function renderPage(nextPageNum = pageNum, options = {}) {
+    renderQueue = renderQueue
+      .catch(() => {})
+      .then(() => drawPage(nextPageNum, options));
+    return renderQueue;
+  }
+
+  return {
+    async load(bufferLike) {
+      const data = toUint8Array(bufferLike);
+      if (!data) {
+        setStatus('PDF 파일을 찾을 수 없습니다.');
+        return null;
+      }
+
+      setStatus('PDF를 불러오는 중입니다.');
+      pdf = await pdfjsLib.getDocument({ data }).promise;
+      pageNum = 1;
+      updatePageDisplay();
+      await renderPage(1);
+      return pdf;
+    },
+    async goToPage(nextPageNum) {
+      await renderPage(nextPageNum);
+    },
+    async goToQuestion(questionNum) {
+      const entry = normalizeMapEntry(questionMap[String(questionNum)]);
+      if (!entry?.page) return false;
+      await renderPage(entry.page, { pdfY: entry.y });
+      return true;
+    },
+    async zoomIn() {
+      scale = Math.min(scale + 0.1, 3);
+      await renderPage(pageNum);
+    },
+    async zoomOut() {
+      scale = Math.max(scale - 0.1, 0.4);
+      await renderPage(pageNum);
+    },
+    async setScale(nextScale) {
+      scale = Math.max(Math.min(Number(nextScale) || scale, 3), 0.4);
+      await renderPage(pageNum);
+    },
+    async setZoomPercent(percent) {
+      await this.setScale((Number(percent) || 100) / 100);
+    },
+    async fitToScreen() {
+      if (!pdf || !viewer) return;
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 1 });
+      const availableWidth = Math.max(viewer.clientWidth - 28, 240);
+      scale = Math.max(Math.min(availableWidth / viewport.width, 2.5), 0.4);
+      await renderPage(pageNum);
+    },
+    setQuestionMap(map) {
+      questionMap = map || {};
+    },
+    getPdfDocument() {
+      return pdf;
+    },
+    getCurrentPage() {
+      return pageNum;
+    },
+    getTotalPages() {
+      return pdf?.numPages || 0;
+    },
+    getScale() {
+      return scale;
+    },
+  };
+}
+
+export function bindPdfToolbar(pdfViewer) {
+  document.getElementById('prev-page-btn')?.addEventListener('click', () => {
+    pdfViewer.goToPage(pdfViewer.getCurrentPage() - 1);
+  });
+  document.getElementById('next-page-btn')?.addEventListener('click', () => {
+    pdfViewer.goToPage(pdfViewer.getCurrentPage() + 1);
+  });
+  document.getElementById('zoom-in-btn')?.addEventListener('click', () => {
+    pdfViewer.zoomIn();
+  });
+  document.getElementById('zoom-out-btn')?.addEventListener('click', () => {
+    pdfViewer.zoomOut();
+  });
+  document.getElementById('fit-page-btn')?.addEventListener('click', () => {
+    pdfViewer.fitToScreen();
+  });
+  const zoomInput = document.getElementById('zoom-input');
+  zoomInput?.addEventListener('change', () => {
+    pdfViewer.setZoomPercent(zoomInput.value);
+  });
+  zoomInput?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      pdfViewer.setZoomPercent(zoomInput.value);
+    }
+  });
+
+  const wheelTarget = document.querySelector('.pdf-panel');
+  wheelTarget?.addEventListener('wheel', (event) => {
+    if (!event.ctrlKey) return;
+    event.preventDefault();
+    const direction = event.deltaY < 0 ? 1 : -1;
+    const nextScale = pdfViewer.getScale() + (direction * 0.1);
+    pdfViewer.setScale(nextScale);
+  }, { passive: false });
+}

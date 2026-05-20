@@ -27,10 +27,27 @@
     </section>
 
     <section class="pdf-panel" aria-label="문제 PDF">
-      <iframe id="pdf-frame" title="기출문제 PDF"></iframe>
+      <div id="pdf-viewer" class="pdf-viewer">
+        <canvas id="pdf-canvas"></canvas>
+        <p id="pdf-status" class="pdf-status">PDF를 불러오는 중입니다.</p>
+      </div>
+      <footer class="pdf-toolbar history-pdf-toolbar" aria-label="PDF 제어">
+        <button id="prev-page-btn" class="secondary-button" type="button">이전</button>
+        <span id="page-display">0 / 0 page</span>
+        <button id="next-page-btn" class="secondary-button" type="button">다음</button>
+        <button id="zoom-out-btn" class="secondary-button" type="button">-</button>
+        <label class="zoom-control">
+          <span>배율</span>
+          <input id="zoom-input" type="number" min="40" max="300" step="10" value="120">
+          <span>%</span>
+        </label>
+        <button id="zoom-in-btn" class="secondary-button" type="button">+</button>
+        <button id="fit-page-btn" class="secondary-button" type="button">맞춤</button>
+      </footer>
     </section>
   </main>
 
-  <script src="js/history.js"></script>
+  <script type="module" src="js/pdf-viewer.js"></script>
+  <script type="module" src="js/history.js"></script>
 </body>
 </html>

@@ -7,12 +7,24 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="exam-page">
-  <main class="exam-container">
-    <section class="pdf-panel" aria-label="문제 PDF">
-      <iframe id="pdf-frame" title="기출문제 PDF"></iframe>
-    </section>
+  <main class="exam-shell">
+    <nav class="question-nav-panel" aria-label="문항 번호">
+      <div class="question-nav-head">
+        <strong>문항</strong>
+        <span id="mapping-status">PDF 분석 대기</span>
+      </div>
+      <div id="question-nav" class="question-nav"></div>
+    </nav>
 
-    <aside class="sidebar" aria-label="답안 입력">
+    <section class="exam-container">
+      <section class="pdf-panel" aria-label="문제 PDF">
+        <div id="pdf-viewer" class="pdf-viewer">
+          <canvas id="pdf-canvas"></canvas>
+          <p id="pdf-status" class="pdf-status">PDF를 불러오는 중입니다.</p>
+        </div>
+      </section>
+
+      <aside class="sidebar" aria-label="답안 입력">
       <header class="sidebar-header">
         <button id="back-btn" class="back-button" type="button">뒤로가기</button>
         <h1 id="exam-title">CBT</h1>
@@ -32,6 +44,10 @@
             <button id="check-btn" type="button">오답 체크</button>
             <button id="reset-btn" type="button" class="secondary-button">초기화</button>
           </div>
+          <div class="control-buttons">
+            <button id="next-unanswered-btn" type="button" class="secondary-button">미응답 이동</button>
+            <button id="edit-map-btn" type="button" class="secondary-button">페이지 매핑</button>
+          </div>
           <p id="score-display" class="score-display">아직 채점하지 않았습니다.</p>
           <p id="wrong-list" class="wrong-list"></p>
         </section>
@@ -39,15 +55,56 @@
 
       <section>
         <div class="answer-head">
-          <h2>답안</h2>
+          <h2 id="current-question-title">1번 답안</h2>
           <span id="answered-count">0/100</span>
+        </div>
+        <div class="current-answer-actions">
+          <button id="review-btn" class="secondary-button" type="button">검토 표시</button>
+          <div class="step-buttons">
+            <button id="prev-question-btn" class="secondary-button" type="button">이전</button>
+            <button id="next-question-btn" class="secondary-button" type="button">다음</button>
+          </div>
         </div>
         <div id="answer-container" class="answer-container"></div>
       </section>
-    </aside>
+
+      </aside>
+    </section>
+
+    <footer class="pdf-toolbar" aria-label="PDF 제어">
+      <button id="prev-page-btn" class="secondary-button" type="button">이전 페이지</button>
+      <span id="page-display">0 / 0 page</span>
+      <button id="next-page-btn" class="secondary-button" type="button">다음 페이지</button>
+      <button id="zoom-out-btn" class="secondary-button" type="button">-</button>
+      <label class="zoom-control">
+        <span>배율</span>
+        <input id="zoom-input" type="number" min="40" max="300" step="10" value="120">
+        <span>%</span>
+      </label>
+      <button id="zoom-in-btn" class="secondary-button" type="button">+</button>
+      <button id="fit-page-btn" class="secondary-button" type="button">맞춤</button>
+    </footer>
+
+    <dialog id="map-dialog" class="guide-dialog">
+      <form method="dialog">
+        <section class="guide-view">
+          <h2>페이지 매핑 편집</h2>
+          <p class="guide-note">문항 번호와 PDF 페이지를 줄마다 `문항:페이지` 형식으로 입력하세요. 자동 감지된 문항은 위치값까지 함께 저장됩니다.</p>
+          <textarea id="map-input" rows="12"></textarea>
+          <div class="dialog-actions">
+            <button id="rescan-map-btn" class="secondary-button" type="button">자동 재감지</button>
+            <button id="save-map-btn" type="button">저장</button>
+            <button class="secondary-button" type="submit">닫기</button>
+          </div>
+        </section>
+      </form>
+    </dialog>
   </main>
 
   <script src="js/timer.js"></script>
-  <script src="js/answers.js"></script>
+  <script type="module" src="js/pdf-viewer.js"></script>
+  <script type="module" src="js/question-detector.js"></script>
+  <script type="module" src="js/navigation.js"></script>
+  <script type="module" src="js/answers.js"></script>
 </body>
 </html>

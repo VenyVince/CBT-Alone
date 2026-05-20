@@ -283,22 +283,170 @@ button:hover {
   gap: 8px;
 }
 
+.exam-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100vh;
+}
+
 .exam-container {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 252px;
-  height: 100vh;
+  min-height: 0;
 }
 
 .pdf-panel {
+  position: relative;
   min-width: 0;
+  min-height: 0;
+  overflow: auto;
   background: #e7ebf0;
 }
 
-#pdf-frame {
-  width: 100%;
-  height: 100vh;
-  border: 0;
-  display: block;
+.pdf-viewer {
+  min-height: 100%;
+  display: grid;
+  place-items: start center;
+  padding: 14px;
+}
+
+#pdf-canvas {
+  background: #fff;
+  box-shadow: 0 1px 8px rgba(31, 41, 51, 0.22);
+}
+
+.pdf-status {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pdf-status[hidden] {
+  display: none;
+}
+
+.pdf-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 6px 10px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.pdf-toolbar button {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.zoom-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.zoom-control input {
+  width: 58px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0 6px;
+  color: var(--text);
+  text-align: right;
+}
+
+#page-display {
+  min-width: 96px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.question-nav-panel {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.question-nav-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.question-nav-head strong {
+  color: var(--text);
+}
+
+.mapping-success {
+  color: var(--correct-strong);
+}
+
+.mapping-partial,
+.mapping-failed {
+  color: #b45309;
+}
+
+.question-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+  gap: 5px;
+}
+
+.question-nav-button {
+  min-width: 0;
+  min-height: 30px;
+  padding: 0 4px;
+  border-color: var(--line);
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.question-nav-button:hover {
+  background: #f3f4f6;
+}
+
+.question-nav-button.answered {
+  border-color: var(--primary);
+  background: #eff6ff;
+  color: var(--primary);
+}
+
+.question-nav-button.review {
+  border-color: #f59e0b;
+  background: #fff7ed;
+  color: #b45309;
+}
+
+.question-nav-button.current {
+  outline: 2px solid var(--primary-dark);
+  outline-offset: 1px;
+}
+
+.question-nav-button.correct {
+  border-color: var(--correct-strong);
+  background: var(--correct);
+  color: var(--correct-strong);
+}
+
+.question-nav-button.wrong {
+  border-color: var(--wrong-strong);
+  background: var(--wrong);
+  color: var(--wrong-strong);
 }
 
 .history-container {
@@ -332,6 +480,11 @@ button:hover {
 .history-container.list-only .pdf-panel,
 .history-container.list-only .history-detail {
   display: none;
+}
+
+.history-pdf-toolbar {
+  position: sticky;
+  bottom: 0;
 }
 
 .history-header {
@@ -504,6 +657,33 @@ button:hover {
   margin: 12px 0 8px;
 }
 
+.current-answer-actions {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.current-answer-actions button {
+  min-height: 30px;
+  font-size: 13px;
+}
+
+.step-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.review-active {
+  border-color: #f59e0b;
+  background: #fff7ed;
+  color: #b45309;
+}
+
+.review-active:hover {
+  background: #ffedd5;
+}
+
 .answer-head h2 {
   margin: 0;
   font-size: 18px;
@@ -577,12 +757,16 @@ button:hover {
 }
 
 @media (max-width: 900px) {
+  .exam-shell {
+    height: auto;
+  }
+
   .exam-container {
     grid-template-columns: 1fr;
     height: auto;
   }
 
-  #pdf-frame {
+  .pdf-panel {
     height: 58vh;
   }
 

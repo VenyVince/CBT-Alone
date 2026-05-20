@@ -201,6 +201,13 @@ ipcMain.handle('pdf:getPath', (_event, examId) => {
   return pathToFileURL(pdfPath).toString();
 });
 
+ipcMain.handle('pdf:getBuffer', (_event, examId) => {
+  const id = safeExamId(examId);
+  const pdfPath = path.join(pdfsDir, `${id}.pdf`);
+  if (!fs.existsSync(pdfPath)) return null;
+  return fs.readFileSync(pdfPath);
+});
+
 ipcMain.handle('pdf:delete', (_event, examId) => {
   const id = safeExamId(examId);
   const pdfPath = path.join(pdfsDir, `${id}.pdf`);
@@ -210,6 +217,7 @@ ipcMain.handle('pdf:delete', (_event, examId) => {
   if (fs.existsSync(answerPath)) fs.unlinkSync(answerPath);
   store.delete(`answers.${id}`);
   store.delete(`history.${id}`);
+  store.delete(`questionMap.${id}`);
   rememberDeletedBundledExam(id);
   return true;
 });
@@ -254,4 +262,18 @@ ipcMain.handle('history:save', (_event, examId, data) => {
 ipcMain.handle('history:load', (_event, examId) => {
   const id = safeExamId(examId);
   return store.get(`history.${id}`, []);
+});
+
+ipcMain.handle('questionMap:save', (_event, examId, data) => {
+  const id = safeExamId(examId);
+  store.set(`questionMap.${id}`, {
+    ...(data || {}),
+    savedAt: new Date().toISOString(),
+  });
+  return true;
+});
+
+ipcMain.handle('questionMap:load', (_event, examId) => {
+  const id = safeExamId(examId);
+  return store.get(`questionMap.${id}`, null);
 });

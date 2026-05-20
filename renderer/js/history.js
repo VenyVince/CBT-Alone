@@ -1,3 +1,5 @@
+import { createPdfViewer, bindPdfToolbar } from './pdf-viewer.js';
+
 (async function () {
   const params = new URLSearchParams(location.search);
   const examId = params.get('exam');
@@ -8,12 +10,14 @@
   const summary = document.getElementById('history-summary');
   const wrongList = document.getElementById('history-wrong-list');
   const answerContainer = document.getElementById('history-answer-container');
-  const pdfFrame = document.getElementById('pdf-frame');
 
   if (!examId) {
     location.replace('index.html');
     return;
   }
+
+  const pdfViewer = createPdfViewer();
+  bindPdfToolbar(pdfViewer);
 
   function formatDate(value) {
     const date = new Date(value);
@@ -72,14 +76,15 @@
     location.href = 'index.html';
   });
 
-  const [pdfPath, savedAnswers, historyList] = await Promise.all([
-    window.electronAPI.getPDFPath(examId),
+  const [pdfBuffer, savedAnswers, historyList] = await Promise.all([
+    window.electronAPI.getPDFBuffer(examId),
     window.electronAPI.loadAnswers(examId),
     window.electronAPI.loadHistory(examId),
   ]);
 
   title.textContent = savedAnswers?.label || examId;
-  if (pdfPath) pdfFrame.src = pdfPath;
+  await pdfViewer.load(pdfBuffer);
+  await pdfViewer.fitToScreen();
 
   const records = Array.isArray(historyList) ? historyList : [];
   if (records.length === 0) {
@@ -87,7 +92,7 @@
     return;
   }
 
-  records.forEach((item, index) => {
+  records.forEach((item) => {
     const wrong = Array.isArray(item.wrong) ? item.wrong : [];
     const button = document.createElement('button');
     button.type = 'button';
@@ -99,6 +104,5 @@
     `;
     button.addEventListener('click', () => selectHistory(item, button));
     list.appendChild(button);
-
   });
 }());
