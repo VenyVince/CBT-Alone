@@ -1,12 +1,16 @@
 {
   "name": "cbt-electron",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "PDF CBT desktop app",
   "author": "CBT",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "dev:pwa": "vite --host 0.0.0.0",
+    "build": "electron-builder",
+    "build:electron": "electron-builder",
+    "build:pwa": "vite build",
+    "preview:pwa": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
     "electron-store": "^8.2.0",
@@ -14,7 +18,8 @@
   },
   "devDependencies": {
     "electron": "^30.5.1",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "vite": "^5.4.19"
   },
   "build": {
     "appId": "local.cbt.app",
