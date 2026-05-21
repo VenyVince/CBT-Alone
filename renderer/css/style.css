@@ -324,11 +324,80 @@ button:hover {
 
 .exam-shell {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: 70px 1fr;
+  grid-template-rows: auto 1fr;
   height: 100vh;
 }
 
+.pdf-toolbar-sidebar {
+  grid-row: 1 / 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 8px;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  z-index: 10;
+}
+
+.toolbar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.toolbar-group button {
+  width: 54px;
+  min-width: 54px;
+  padding: 0;
+  font-size: 12px;
+}
+
+.toolbar-divider {
+  width: 80%;
+  height: 1px;
+  background: var(--line);
+}
+
+.zoom-control-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.zoom-control-vertical input {
+  width: 50px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  text-align: center;
+}
+
+.focus-mode-toggle-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.focus-mode-toggle-vertical input {
+  width: 18px;
+  height: 18px;
+}
+
 .exam-container {
+  grid-column: 2;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 252px;
   min-height: 0;
@@ -365,51 +434,16 @@ button:hover {
   display: none;
 }
 
-.pdf-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 46px;
-  padding: 6px 10px;
-  border-top: 1px solid var(--line);
-  background: var(--panel);
-}
-
-.pdf-toolbar button {
-  min-height: 30px;
-  padding: 0 10px;
-  font-size: 13px;
-}
-
-.zoom-control {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.zoom-control input {
-  width: 58px;
-  height: 30px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: 0 6px;
-  color: var(--text);
-  text-align: right;
-}
-
 #page-display {
-  min-width: 96px;
+  min-width: 40px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   text-align: center;
 }
 
 .question-nav-panel {
+  grid-column: 2;
   display: grid;
   gap: 8px;
   padding: 10px;
@@ -797,13 +831,30 @@ button:hover {
 
 @media (max-width: 900px) {
   .exam-shell {
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-columns: 50px 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
     height: 100vh;
     height: 100dvh;
     overflow: hidden;
   }
 
+  .pdf-toolbar-sidebar {
+    padding: 8px 4px;
+    gap: 12px;
+  }
+
+  .toolbar-group button {
+    width: 40px;
+    min-width: 40px;
+    font-size: 10px;
+  }
+
+  .zoom-control-vertical input {
+    width: 38px;
+  }
+
   .exam-container {
+    grid-column: 2;
     grid-template-columns: minmax(0, 1fr) 142px;
     min-height: 0;
   }
@@ -812,7 +863,7 @@ button:hover {
     height: auto;
     min-height: 0;
   }
-
+...
   .sidebar {
     height: auto;
     min-height: 0;
@@ -918,33 +969,6 @@ button:hover {
     height: 26px;
     min-height: 26px;
     font-size: 12px;
-  }
-
-  .pdf-toolbar {
-    flex-wrap: wrap;
-    gap: 4px;
-    min-height: 40px;
-    padding: 4px 6px;
-  }
-
-  .pdf-toolbar button {
-    min-height: 28px;
-    padding: 0 7px;
-    font-size: 12px;
-  }
-
-  #page-display {
-    min-width: 74px;
-    font-size: 12px;
-  }
-
-  .zoom-control {
-    font-size: 12px;
-  }
-
-  .zoom-control input {
-    width: 50px;
-    height: 28px;
   }
 
   .list-shell,

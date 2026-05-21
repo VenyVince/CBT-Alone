@@ -19,6 +19,7 @@ import { createQuestionNavigation } from './navigation.js';
   const mappingStatus = document.getElementById('mapping-status');
   const mapDialog = document.getElementById('map-dialog');
   const mapInput = document.getElementById('map-input');
+  const focusModeCheck = document.getElementById('focus-mode-check');
 
   if (!examId) {
     location.replace('index.html');
@@ -282,6 +283,11 @@ import { createQuestionNavigation } from './navigation.js';
     mappingState = await detectQuestionMap(pdfViewer.getPdfDocument(), questionCount);
     updateMappingStatus();
     mapInput.value = formatQuestionMap(mappingState.map, questionCount);
+  });
+
+  focusModeCheck?.addEventListener('change', async () => {
+    pdfViewer.setFocusMode(focusModeCheck.checked);
+    await selectQuestion(currentQuestion);
   });
 
   const [pdfBuffer, savedAnswers, savedUserAnswers, savedMap] = await Promise.all([

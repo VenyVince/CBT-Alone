@@ -9,6 +9,33 @@
 </head>
 <body class="exam-page">
   <main class="exam-shell">
+    <aside class="pdf-toolbar-sidebar" aria-label="PDF 제어">
+      <div class="toolbar-group">
+        <button id="prev-page-btn" class="secondary-button" type="button" title="이전 페이지">이전</button>
+        <span id="page-display">0/0</span>
+        <button id="next-page-btn" class="secondary-button" type="button" title="다음 페이지">다음</button>
+      </div>
+      
+      <div class="toolbar-divider"></div>
+
+      <div class="toolbar-group">
+        <button id="zoom-in-btn" class="secondary-button" type="button" title="확대">+</button>
+        <label class="zoom-control-vertical">
+          <input id="zoom-input" type="number" min="40" max="300" step="10" value="120">
+          <span>%</span>
+        </label>
+        <button id="zoom-out-btn" class="secondary-button" type="button" title="축소">-</button>
+        <button id="fit-page-btn" class="secondary-button" type="button">맞춤</button>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <label class="focus-mode-toggle-vertical">
+        <input id="focus-mode-check" type="checkbox">
+        <span>한 문항씩</span>
+      </label>
+    </aside>
+
     <nav class="question-nav-panel" aria-label="문항 번호">
       <div class="question-nav-head">
         <strong>문항</strong>
@@ -71,20 +98,6 @@
 
       </aside>
     </section>
-
-    <footer class="pdf-toolbar" aria-label="PDF 제어">
-      <button id="prev-page-btn" class="secondary-button" type="button">이전 페이지</button>
-      <span id="page-display">0 / 0 page</span>
-      <button id="next-page-btn" class="secondary-button" type="button">다음 페이지</button>
-      <button id="zoom-out-btn" class="secondary-button" type="button">-</button>
-      <label class="zoom-control">
-        <span>배율</span>
-        <input id="zoom-input" type="number" min="40" max="300" step="10" value="120">
-        <span>%</span>
-      </label>
-      <button id="zoom-in-btn" class="secondary-button" type="button">+</button>
-      <button id="fit-page-btn" class="secondary-button" type="button">맞춤</button>
-    </footer>
 
     <dialog id="map-dialog" class="guide-dialog">
       <form method="dialog">

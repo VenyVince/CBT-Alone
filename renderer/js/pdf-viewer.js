@@ -29,6 +29,7 @@ export function createPdfViewer(options = {}) {
   let renderTask = null;
   let renderQueue = Promise.resolve();
   let questionMap = {};
+  let focusMode = false;
 
   function setStatus(message) {
     if (status) {
@@ -61,12 +62,16 @@ export function createPdfViewer(options = {}) {
     return Math.max(Math.min(Math.min(widthScale, heightScale), 3), 0.4);
   }
 
-  async function scrollToPdfY(page, pdfY) {
-    if (!scrollContainer || pdfY === undefined || pdfY === null) return;
+  async function scrollToPdfPoint(page, pdfX, pdfY) {
+    if (!scrollContainer) return;
     const viewport = page.getViewport({ scale });
-    const [, viewportY] = viewport.convertToViewportPoint(0, Number(pdfY));
-    scrollContainer.scrollTop = Math.max(viewportY - 28, 0);
-    scrollContainer.scrollLeft = 0;
+    const [vx, vy] = viewport.convertToViewportPoint(Number(pdfX || 0), Number(pdfY || 0));
+    if (pdfY !== undefined && pdfY !== null) {
+      scrollContainer.scrollTop = Math.max(vy - 28, 0);
+    }
+    if (pdfX !== undefined && pdfX !== null) {
+      scrollContainer.scrollLeft = Math.max(vx - 14, 0);
+    }
   }
 
   async function drawPage(nextPageNum = pageNum, options = {}) {
@@ -91,9 +96,11 @@ export function createPdfViewer(options = {}) {
 
     try {
       await renderTask.promise;
-      await scrollToPdfY(page, options.pdfY);
+      await scrollToPdfPoint(page, options.pdfX, options.pdfY);
       if (scrollContainer && (options.pdfY === undefined || options.pdfY === null)) {
         scrollContainer.scrollTop = 0;
+      }
+      if (scrollContainer && (options.pdfX === undefined || options.pdfX === null)) {
         scrollContainer.scrollLeft = 0;
       }
       setStatus('');
@@ -136,11 +143,43 @@ export function createPdfViewer(options = {}) {
       const entry = normalizeMapEntry(questionMap[String(questionNum)]);
       if (!entry?.page) return false;
       const page = await pdf?.getPage(entry.page);
-      if (page) {
-        scale = Math.max(getViewportFitScale(page) * 1.45, 1.25);
+
+      if (focusMode && page) {
+        const viewport = page.getViewport({ scale: 1 });
+        const availableWidth = Math.max((viewer?.clientWidth || window.innerWidth || 0) - 40, 240);
+        
+        // Detect 2-column by checking if any question on this page is in the right half
+        const isTwoColumn = Object.values(questionMap).some(e => 
+          normalizeMapEntry(e).page === entry.page && 
+          normalizeMapEntry(e).x > viewport.width * 0.45
+        );
+        const isRightColumn = isTwoColumn && (entry.x > viewport.width * 0.45);
+        
+        if (isTwoColumn) {
+          scale = (availableWidth / (viewport.width / 2)) * 1.05;
+        } else {
+          scale = (availableWidth / viewport.width) * 1.05;
+        }
+        
+        await renderPage(entry.page, { 
+          pdfX: isRightColumn ? viewport.width / 2 : 0,
+          pdfY: entry.anchorY ?? entry.y 
+        });
+      } else {
+        if (page) {
+          scale = Math.max(getViewportFitScale(page) * 1.45, 1.25);
+        }
+        await renderPage(entry.page, { pdfY: entry.anchorY ?? entry.y });
       }
-      await renderPage(entry.page, { pdfY: entry.anchorY ?? entry.y });
       return true;
+    },
+    setFocusMode(enabled) {
+      focusMode = !!enabled;
+      if (focusMode) {
+        scrollContainer?.classList.add('focus-mode-active');
+      } else {
+        scrollContainer?.classList.remove('focus-mode-active');
+      }
     },
     async zoomIn() {
       scale = Math.min(scale + 0.1, 3);
