@@ -36,6 +36,7 @@ export async function detectQuestionMap(pdf, expectedCount) {
   }
 
   const map = {};
+  const pageEntries = new Map();
   let textItems = 0;
 
   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum += 1) {
@@ -53,13 +54,40 @@ export async function detectQuestionMap(pdf, expectedCount) {
         if (questionNum >= 1 && questionNum <= expectedCount && !map[String(questionNum)]) {
           const [, , , , x, y] = item.transform;
           const [, viewportY] = viewport.convertToViewportPoint(x, y);
-          map[String(questionNum)] = {
+          const entry = {
             page: pageNum,
             y,
             viewportY,
+            x,
+            pageWidth: viewport.width,
+            pageHeight: viewport.height,
           };
+          map[String(questionNum)] = entry;
+          if (!pageEntries.has(pageNum)) pageEntries.set(pageNum, []);
+          pageEntries.get(pageNum).push({
+            questionNum,
+            ...entry,
+          });
         }
       }
+    }
+  }
+
+  for (const entries of pageEntries.values()) {
+    entries.sort((a, b) => a.viewportY - b.viewportY || a.x - b.x);
+    for (let i = 0; i < entries.length; i += 1) {
+      const current = entries[i];
+      if (current.x <= (current.pageWidth / 2)) continue;
+
+      const nextLower = entries.slice(i + 1).find((item) => item.viewportY > current.viewportY + 24);
+      const anchorViewportY = nextLower
+        ? Math.max(nextLower.viewportY - 18, current.viewportY + 24)
+        : Math.min(current.viewportY + 120, current.pageHeight - 24);
+
+      const page = await pdf.getPage(current.page);
+      const pageViewport = page.getViewport({ scale: 1 });
+      const [, anchorY] = pageViewport.convertToPdfPoint(0, anchorViewportY);
+      map[String(current.questionNum)].anchorY = anchorY;
     }
   }
 

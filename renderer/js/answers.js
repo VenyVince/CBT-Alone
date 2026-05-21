@@ -34,6 +34,7 @@ import { createQuestionNavigation } from './navigation.js';
   let currentQuestion = 1;
   let mappingState = { status: 'idle', map: {}, failedQuestions: [] };
   let gradingResults = {};
+  let gradingCorrectAnswers = {};
 
   const navigation = createQuestionNavigation({
     container: document.getElementById('question-nav'),
@@ -91,53 +92,60 @@ import { createQuestionNavigation } from './navigation.js';
 
   function clearMarks() {
     gradingResults = {};
-    answerContainer.querySelectorAll('.question-row').forEach((row) => {
-      row.classList.remove('correct', 'wrong');
-      row.querySelectorAll('button').forEach((button) => {
-        button.classList.remove('answer-mark');
-      });
-    });
+    gradingCorrectAnswers = {};
+    renderCurrentAnswerRow();
     updateNavigation();
   }
 
-  function renderAnswerRows() {
+  function renderCurrentAnswerRow() {
     answerContainer.innerHTML = '';
-    for (let q = 1; q <= questionCount; q += 1) {
-      const row = document.createElement('div');
-      row.className = 'question-row';
-      row.dataset.q = String(q);
-      row.innerHTML = `
-        <span class="q-num">${q}번</span>
-        <button type="button" data-v="1" aria-label="${q}번 1번">1</button>
-        <button type="button" data-v="2" aria-label="${q}번 2번">2</button>
-        <button type="button" data-v="3" aria-label="${q}번 3번">3</button>
-        <button type="button" data-v="4" aria-label="${q}번 4번">4</button>
-      `;
-      answerContainer.appendChild(row);
+    const q = currentQuestion;
+    const key = String(q);
+    const row = document.createElement('div');
+    row.className = 'question-row current-question-row';
+    row.dataset.q = key;
+    row.innerHTML = `
+      <span class="q-num">${q}번</span>
+      <button type="button" data-v="1" aria-label="${q}번 1번">1</button>
+      <button type="button" data-v="2" aria-label="${q}번 2번">2</button>
+      <button type="button" data-v="3" aria-label="${q}번 3번">3</button>
+      <button type="button" data-v="4" aria-label="${q}번 4번">4</button>
+    `;
+    answerContainer.appendChild(row);
+
+    const selectedButton = row.querySelector(`button[data-v="${userAnswers[key]}"]`);
+    if (selectedButton) selectedButton.classList.add('selected');
+
+    if (gradingResults[key] !== undefined) {
+      row.classList.add(gradingResults[key] ? 'correct' : 'wrong');
+      row.dataset.correctValue = String(gradingCorrectAnswers[key]);
     }
+
+    updateCurrentAnswerMark();
   }
 
-  function restoreSelections() {
-    Object.entries(userAnswers).forEach(([q, value]) => {
-      const row = answerContainer.querySelector(`.question-row[data-q="${q}"]`);
-      const button = row?.querySelector(`button[data-v="${value}"]`);
-      if (button) button.classList.add('selected');
-    });
-    updateNavigation();
+  function updateCurrentAnswerMark() {
+    const row = answerContainer.querySelector(`.question-row[data-q="${currentQuestion}"]`);
+    const correctValue = row?.dataset.correctValue;
+    if (!row || !correctValue) return;
+
+    const correctButton = row.querySelector(`button[data-v="${correctValue}"]`);
+    if (correctButton) correctButton.classList.add('answer-mark');
   }
 
   function markQuestion(q, isCorrect, correctValue) {
     const row = answerContainer.querySelector(`.question-row[data-q="${q}"]`);
-    if (!row) return;
-
-    row.classList.add(isCorrect ? 'correct' : 'wrong');
-    const correctButton = row.querySelector(`button[data-v="${correctValue}"]`);
-    if (correctButton) correctButton.classList.add('answer-mark');
     gradingResults[String(q)] = isCorrect;
+
+    if (!row) return;
+    row.dataset.correctValue = String(correctValue);
+    row.classList.add(isCorrect ? 'correct' : 'wrong');
+    updateCurrentAnswerMark();
   }
 
   async function selectQuestion(questionNum) {
     currentQuestion = Math.min(Math.max(questionNum, 1), questionCount);
+    renderCurrentAnswerRow();
     updateNavigation();
 
     if (mappingState.status === 'success' || mappingState.status === 'partial') {
@@ -188,11 +196,13 @@ import { createQuestionNavigation } from './navigation.js';
       if (isCorrect) score += 1;
       else wrong.push(q);
 
+      gradingCorrectAnswers[String(q)] = correctValue;
       markQuestion(q, isCorrect, correctValue);
     }
 
     scoreDisplay.textContent = `${score}점 (${score}/${questionCount})`;
     wrongList.textContent = wrong.length ? `오답: ${wrong.join(', ')}번` : '모두 정답입니다.';
+    renderCurrentAnswerRow();
     updateNavigation();
 
     await window.electronAPI.saveHistory(examId, {
@@ -231,9 +241,7 @@ import { createQuestionNavigation } from './navigation.js';
     reviews = {};
     await persistUserState();
     clearMarks();
-    answerContainer.querySelectorAll('button.selected').forEach((button) => {
-      button.classList.remove('selected');
-    });
+    renderCurrentAnswerRow();
     scoreDisplay.textContent = '답안을 초기화했습니다.';
     wrongList.textContent = '';
     updateNavigation();
@@ -290,8 +298,8 @@ import { createQuestionNavigation } from './navigation.js';
   reviews = normalized.reviews;
 
   navigation.init(questionCount);
-  renderAnswerRows();
-  restoreSelections();
+  renderCurrentAnswerRow();
+  updateNavigation();
 
   const pdf = await pdfViewer.load(pdfBuffer);
   if (pdf) {

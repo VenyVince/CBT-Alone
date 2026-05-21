@@ -122,7 +122,7 @@ export function createPdfViewer(options = {}) {
     async goToQuestion(questionNum) {
       const entry = normalizeMapEntry(questionMap[String(questionNum)]);
       if (!entry?.page) return false;
-      await renderPage(entry.page, { pdfY: entry.y });
+      await renderPage(entry.page, { pdfY: entry.anchorY ?? entry.y });
       return true;
     },
     async zoomIn() {
