@@ -156,9 +156,9 @@ export function createPdfViewer(options = {}) {
         const isRightColumn = isTwoColumn && (entry.x > viewport.width * 0.45);
         
         if (isTwoColumn) {
-          scale = (availableWidth / (viewport.width / 2)) * 1.05;
+          scale = (availableWidth / (viewport.width / 2)) * 0.9;
         } else {
-          scale = (availableWidth / viewport.width) * 1.05;
+          scale = (availableWidth / viewport.width) * 0.9;
         }
         
         await renderPage(entry.page, { 
