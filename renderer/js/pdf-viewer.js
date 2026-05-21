@@ -52,6 +52,15 @@ export function createPdfViewer(options = {}) {
     return entry;
   }
 
+  function getViewportFitScale(page) {
+    const viewport = page.getViewport({ scale: 1 });
+    const availableWidth = Math.max((viewer?.clientWidth || window.innerWidth || 0) - 28, 240);
+    const availableHeight = Math.max((scrollContainer?.clientHeight || window.innerHeight || 0) - 28, 240);
+    const widthScale = availableWidth / viewport.width;
+    const heightScale = availableHeight / viewport.height;
+    return Math.max(Math.min(Math.min(widthScale, heightScale), 3), 0.4);
+  }
+
   async function scrollToPdfY(page, pdfY) {
     if (!scrollContainer || pdfY === undefined || pdfY === null) return;
     const viewport = page.getViewport({ scale });
@@ -83,6 +92,10 @@ export function createPdfViewer(options = {}) {
     try {
       await renderTask.promise;
       await scrollToPdfY(page, options.pdfY);
+      if (scrollContainer && (options.pdfY === undefined || options.pdfY === null)) {
+        scrollContainer.scrollTop = 0;
+        scrollContainer.scrollLeft = 0;
+      }
       setStatus('');
     } catch (error) {
       if (error?.name !== 'RenderingCancelledException') {
@@ -122,7 +135,16 @@ export function createPdfViewer(options = {}) {
     async goToQuestion(questionNum) {
       const entry = normalizeMapEntry(questionMap[String(questionNum)]);
       if (!entry?.page) return false;
-      await renderPage(entry.page, { pdfY: entry.anchorY ?? entry.y });
+      const page = await pdf?.getPage(entry.page);
+      if (page) {
+        scale = getViewportFitScale(page);
+      }
+      const viewport = page?.getViewport({ scale: 1 });
+      const availableHeight = Math.max((scrollContainer?.clientHeight || window.innerHeight || 0) - 28, 240);
+      const shouldScrollToAnchor = viewport
+        ? viewport.height * scale > availableHeight + 4
+        : Boolean(entry.anchorY ?? entry.y);
+      await renderPage(entry.page, shouldScrollToAnchor ? { pdfY: entry.anchorY ?? entry.y } : {});
       return true;
     },
     async zoomIn() {
@@ -143,9 +165,7 @@ export function createPdfViewer(options = {}) {
     async fitToScreen() {
       if (!pdf || !viewer) return;
       const page = await pdf.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 1 });
-      const availableWidth = Math.max(viewer.clientWidth - 28, 240);
-      scale = Math.max(Math.min(availableWidth / viewport.width, 2.5), 0.4);
+      scale = getViewportFitScale(page);
       await renderPage(pageNum);
     },
     async fitToQuarterPage() {
