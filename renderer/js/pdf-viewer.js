@@ -137,14 +137,9 @@ export function createPdfViewer(options = {}) {
       if (!entry?.page) return false;
       const page = await pdf?.getPage(entry.page);
       if (page) {
-        scale = getViewportFitScale(page);
+        scale = Math.max(getViewportFitScale(page) * 1.45, 1.25);
       }
-      const viewport = page?.getViewport({ scale: 1 });
-      const availableHeight = Math.max((scrollContainer?.clientHeight || window.innerHeight || 0) - 28, 240);
-      const shouldScrollToAnchor = viewport
-        ? viewport.height * scale > availableHeight + 4
-        : Boolean(entry.anchorY ?? entry.y);
-      await renderPage(entry.page, shouldScrollToAnchor ? { pdfY: entry.anchorY ?? entry.y } : {});
+      await renderPage(entry.page, { pdfY: entry.anchorY ?? entry.y });
       return true;
     },
     async zoomIn() {
